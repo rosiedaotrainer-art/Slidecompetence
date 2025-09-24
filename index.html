@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIMID: Chiến lược Tái cấu trúc Nguồn vốn Nhân lực 2025-2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Oswald -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- jsPDF and html2canvas for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* Custom Styles */
+        :root {
+            --color-primary-orange: #FF9800;
+            --color-primary-green: #009688;
+            --color-primary-blue: #5C6BC0;
+            --color-primary-dark-blue: #1a237e;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-color: #111827; /* Dark background for stage effect */
+            background-image: linear-gradient(rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.9)), url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2832&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            color: #E5E7EB; /* Light gray text color */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Main container for the presentation stage */
+        .presentation-stage {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .presentation-card {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: calc(100vh - 100px); /* Adjust max-height to leave space for controls */
+            aspect-ratio: 16 / 9;
+            background-color: #1F2937;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2.5rem 3.5rem; /* Further reduced padding */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            transform: scale(0.95);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        .slide-content-wrapper {
+            width: 100%;
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        
+        .slide h1 { font-size: 3rem; margin-bottom: 1rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.5); }
+        .slide h2 { font-size: 2.5rem; margin-bottom: 1rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.3); }
+        .slide h3 { font-size: 1.5rem; }
+
+        .slide p, .slide li {
+            font-size: 1.25rem; /* 20pt - Minimum required size */
+            line-height: 1.5;
+            color: #D1D5DB;
+        }
+        
+        .page-number {
+             position: absolute;
+             bottom: 1rem;
+             right: 1.5rem;
+             font-size: 0.9rem;
+             color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Side controls (Prev/Next) */
+        .side-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        .side-control:hover {
+            background-color: rgba(0, 0, 0, 0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+        #prev-btn { left: calc(50% - 600px - 60px); }
+        #next-btn { right: calc(50% - 600px - 60px); }
+
+        /* Bottom global controls area */
+        .global-controls {
+            flex-shrink: 0;
+            height: 80px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 1rem;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        #toolbar {
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.5rem;
+            border-radius: 999px;
+            display: flex;
+            gap: 1.5rem;
+            order: 1;
+            margin-bottom: 0.75rem;
+        }
+        .tool-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: color 0.3s, transform 0.3s;
+        }
+        .tool-btn:hover {
+            color: var(--color-primary-orange);
+            transform: scale(1.1);
+        }
+
+        #progress-bar {
+            display: flex;
+            gap: 0.75rem;
+            order: 2;
+        }
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .progress-dot:hover {
+            transform: scale(1.2);
+        }
+        .progress-dot.active {
+            background-color: var(--color-primary-orange);
+        }
+        
+        .main-footer {
+            position: fixed;
+            bottom: 5px;
+            left: 10px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 100;
+        }
+
+        /* Show/Hide controls logic */
+        .show-controls .global-controls,
+        .show-controls .side-control {
+            opacity: 1;
+        }
+
+        /* Special Backgrounds */
+        .bg-model { background-color: #111827; }
+        .bg-interactive { 
+            background-image: linear-gradient(rgba(26, 35, 126, 0.2), rgba(26, 35, 126, 0.2)),
+                              radial-gradient(circle, rgba(92,107,192,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .bg-structure { background-color: #1F2937; }
+        
+        [contenteditable="true"] {
+            outline: 2px dashed transparent;
+            transition: outline 0.3s;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+        }
+        [contenteditable="true"]:hover, [contenteditable="true"]:focus {
+            outline-color: var(--color-primary-blue);
+            background-color: rgba(92, 107, 192, 0.1);
+        }
+
+        .build-item { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+        .build-item.visible { opacity: 1; transform: translateY(0); }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); display: flex;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background-color: #1F2937; padding: 2rem; border-radius: 1rem;
+            width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="show-controls">
+
+    <div class="presentation-stage">
+        <div id="presentation-card" class="presentation-card">
+            <div id="slides-container">
+                <!-- Slides will be injected here by JS -->
+            </div>
+            <div class="page-number" id="page-number-display"></div>
+        </div>
+       <button id="prev-btn" class="side-control"><i class="fas fa-chevron-left"></i></button>
+        <button id="next-btn" class="side-control"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    
+    <div class="global-controls">
+        <div id="toolbar">
+            <button id="fullscreen-btn" class="tool-btn" title="Toàn màn hình (F)"><i class="fas fa-expand"></i></button>
+            <button id="presenter-view-btn" class="tool-btn" title="Chế độ Diễn giả (P)"><i class="fas fa-user-tie"></i></button>
+            <button id="export-btn" class="tool-btn" title="Xuất bản"><i class="fas fa-file-export"></i></button>
+            <button id="ai-assistant-btn" class="tool-btn" title="Trợ lý Sáng tạo AI"><i class="fas fa-wand-magic-sparkles"></i></button>
+        </div>
+        <div id="progress-bar"></div>
+    </div>
+    
+    <footer class="main-footer">Tài liệu tư vấn. Bản quyền thuộc Rosie Đào Hạnh Giang - Build Talents</footer>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-white">Xuất Bản Trình Bày</h2>
+            <p class="text-gray-400 mb-6">Chọn các slide bạn muốn đưa vào file xuất bản.</p>
+            <div class="flex justify-between items-center mb-4">
+                <button id="select-all-slides" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Chọn Tất Cả</button>
+                <button id="deselect-all-slides" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Bỏ Chọn Tất Cả</button>
+            </div>
+            <div id="slide-selection-list" class="space-y-2 mb-6"></div>
+            <div class="flex justify-end space-x-4">
+                <button id="cancel-export" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">Hủy</button>
+                <button id="export-as-html" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Xuất HTML</button>
+                <button id="export-as-pdf" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Xuất PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Modal -->
+    <div id="ai-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-white flex items-center"><i class="fas fa-wand-magic-sparkles mr-2"></i> Trợ lý Sáng tạo AI</h2>
+            <p class="text-gray-400 mb-6">Dựa trên nội dung slide hiện tại, AI đề xuất các ý tưởng sau để thảo luận sâu hơn:</p>
+            <div id="ai-content" class="bg-gray-800 p-4 rounded-lg"></div>
+             <div class="flex justify-end mt-6">
+                 <button id="close-ai-modal" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">Đóng</button>
+             </div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const slidesData = [
+        // PHẦN MỞ ĐẦU
+        { 
+            id: 'slide-1',
+            type: 'bg-structure',
+            notes: 'Bắt đầu bằng cách khẳng định tầm nhìn và mục tiêu của dự án. Nhấn mạnh rằng đây không chỉ là một thay đổi về nhân sự, mà là một bước chuyển mình chiến lược để VIMID củng cố vị thế dẫn đầu.',
+            content: `
+                <h1 contenteditable="true" class="text-6xl font-bold text-center" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">KIẾN TẠO NỀN TẢNG CHO TẦM NHÌN DẪN ĐẦU</h1>
+                <h2 contenteditable="true" class="text-3xl font-light text-center" style="color: var(--color-primary-orange);">Đề xuất Chiến lược Tái cấu trúc Nguồn vốn Nhân lực | 2025 - 2026</h2>
+                <div style="background-image: linear-gradient(rgba(26, 35, 126, 0.75), rgba(26, 35, 126, 0.75)), url(https://images.unsplash.com/photo-1521790797524-b249282370e2?q=80&w=2938&auto=format&fit=crop); height:0px; width:0px;"></div>
+            `
+        },
+        {
+            id: 'slide-2',
+            notes: 'Giới thiệu lộ trình của buổi trình bày. Giúp khán giả có một cái nhìn tổng quan về những gì sắp diễn ra, tạo ra một dòng chảy logic và dễ theo dõi.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-6">Lộ trình Buổi thảo luận</h2>
+                <div class="text-left w-full max-w-4xl text-2xl space-y-3">
+                    <p contenteditable="true" class="build-item"><strong class="text-orange-400">PHẦN 1:</strong> Tại sao phải Thay đổi? (Bối cảnh & Thách thức)</p>
+                    <p contenteditable="true" class="build-item"><strong class="text-orange-400">PHẦN 2:</strong> Thay đổi như thế nào? (Đề xuất Giải pháp Toàn diện)</p>
+                    <p contenteditable="true" class="build-item"><strong class="text-orange-400">PHẦN 3:</strong> Làm sao để Thành công? (Lộ trình & Tích hợp)</p>
+                    <p contenteditable="true" class="build-item"><strong class="text-orange-400">PHẦN 4:</strong> Đo lường ra sao? (Hiệu quả & Các bước Tiếp theo)</p>
+                </div>
+            `
+        },
+        {
+            id: 'slide-3',
+            notes: 'Làm rõ mục tiêu của buổi họp: đây là một buổi trình bày đề xuất sơ bộ để thảo luận và nhận phản hồi. Mục tiêu là thống nhất về định hướng và xác định các bước tiếp theo, không phải là để phê duyệt cuối cùng.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-6">Mục tiêu Buổi trình bày</h2>
+                <div class="text-left w-full max-w-4xl text-2xl space-y-3">
+                    <p contenteditable="true" class="build-item"><i class="fas fa-lightbulb text-green-400 mr-3"></i>Thống nhất về sự cấp thiết và tầm nhìn chiến lược của dự án.</p>
+                    <p contenteditable="true" class="build-item"><i class="fas fa-comments text-green-400 mr-3"></i>Thảo luận, cho ý kiến về các định hướng giải pháp sơ bộ.</p>
+                    <p contenteditable="true" class="build-item"><i class="fas fa-handshake text-green-400 mr-3"></i>Xác định các bước tiếp theo để xây dựng đề xuất hợp tác chi tiết.</p>
+                </div>
+            `
+        },
+
+        // PHẦN 1: Bối cảnh & Thách thức
+        { 
+            id: 'slide-4',
+            type: 'bg-structure',
+            notes: 'Mở đầu phần 1, khẳng định VIMID đang ở một thời điểm quan trọng, một giao điểm của thành công quá khứ và những thách thức tương lai.',
+            content: `
+                <h1 contenteditable="true" class="text-6xl font-bold">PHẦN 1</h1>
+                <h2 contenteditable="true" class="text-4xl font-light" style="color: var(--color-primary-orange);">Tại sao phải Thay đổi?</h2>
+                 <div style="background-image: linear-gradient(rgba(26, 35, 126, 0.75), rgba(26, 35, 126, 0.75)), url(https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2940&auto=format&fit=crop); height:0px; width:0px;"></div>
+            `
+        },
+        {
+            id: 'slide-5',
+            notes: 'VIMID không bắt đầu từ con số không. Chúng ta có nền tảng vững chắc. Tuy nhiên, sự thay đổi của môi trường kinh doanh đòi hỏi chúng ta phải có bước đi táo bạo hơn.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">VIMID đang ở thời khắc chuyển mình mang tính lịch sử.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl">Nền tảng 15 năm dẫn đầu là bệ phóng vững chắc. Bước chuyển mình sang <strong class="text-orange-400">SẢN XUẤT & LẮP RÁP</strong> là yêu cầu bắt buộc để kiến tạo tương lai.</p>
+            `
+        },
+        {
+            id: 'slide-6',
+            notes: 'Trình bày các động lực chính từ môi trường bên ngoài. Chính sách của chính phủ là "làn gió thuận" cho chiến lược sản xuất của chúng ta.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">Môi trường ngành đang tạo ra một "cơn gió thuận".</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl">
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Chính sách Hậu thuẫn</h3>
+                        <p contenteditable="true" class="text-lg">Chính phủ thúc đẩy sản xuất nội địa, mục tiêu đáp ứng >65% nhu cầu linh kiện vào 2035.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Thị trường Rộng mở</h3>
+                        <p contenteditable="true" class="text-lg">Thị trường xe tải dự báo tăng trưởng CAGR 8.05% giai đoạn 2024-2028, đảm bảo đầu ra.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Công nghệ Dẫn dắt</h3>
+                        <p contenteditable="true" class="text-lg">Điện khí hóa, AI, IoT là xu hướng tất yếu, đòi hỏi sự chủ động trong R&D và sản xuất.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-7',
+            type: 'bg-model',
+            notes: 'Đây là luận điểm cốt lõi. Sự thay đổi không phải là một lựa chọn, mà là một yêu cầu bắt buộc để tồn tại và phát triển. Chuyển từ "vốn thương mại" sang "vốn công nghiệp".',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">Đây không phải là lựa chọn, mà là một YÊU CẦU CHIẾN LƯỢC.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-4">Sự dịch chuyển DNA: từ tổ chức <strong class="text-green-400">thương mại - dịch vụ</strong> sang một 'gã khổng lồ' phức hợp <strong class="text-orange-400">thương mại - dịch vụ - CÔNG NGHIỆP</strong>.</p>
+                <p contenteditable="true" class="max-w-5xl text-xl">Hệ thống quản trị nhân sự hiện tại được thiết kế cho quá khứ, không phải cho tương lai này.</p>
+            `
+        },
+        {
+            id: 'slide-8',
+            notes: 'Phân tích chẩn đoán. Hệ thống hiện tại có điểm mạnh, nhưng cũng có những "lỗ hổng" chiến lược nghiêm trọng cần được khắc phục ngay lập tức.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">Ba rào cản chiến lược cần được tháo gỡ.</h2>
+                <div class="text-left w-full max-w-5xl text-2xl space-y-2">
+                   <p contenteditable="true" class="build-item"><strong class="text-red-400">1. Nền tảng Năng lực Lỗi thời:</strong> Khung năng lực 2019 không thể 'gánh' được tầm vóc của một nhà sản xuất.</p>
+                   <p contenteditable="true" class="build-item"><strong class="text-red-400">2. Văn hóa 'trên giấy':</strong> Giá trị VIMERS chưa trở thành kim chỉ nam cho hành động và quyết định hàng ngày.</p>
+                   <p contenteditable="true" class="build-item"><strong class="text-red-400">3. Đãi ngộ Mất Sức hút:</strong> Hệ thống 3P không đủ cạnh tranh trong 'sân chơi' nhân tài công nghiệp.</p>
+                </div>
+            `
+        },
+        {
+            id: 'slide-9',
+            type: 'bg-model',
+            notes: 'Slide này tóm tắt vấn đề cốt lõi. Các hệ thống nhân sự đang hoạt động riêng lẻ như những "ốc đảo". Giải pháp là tạo ra một kiến trúc tích hợp với Khung Năng lực làm xương sống.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">Vấn đề Cốt lõi: Các quy trình nhân sự đang là những 'ốc đảo' cô lập.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl">GIẢI PHÁP: Xây dựng một <strong class='text-orange-400'>KIẾN TRÚC NHÂN SỰ TÍCH HỢP</strong> - một hệ điều hành duy nhất, lấy <strong class='text-orange-400'>KHUNG NĂNG LỰC</strong> làm 'xương sống'.</p>
+            `
+        },
+        {
+            id: 'slide-10',
+            type: 'bg-interactive',
+            notes: 'Giải thích logic đằng sau giải pháp tích hợp. So sánh trực quan mô hình "trước" và "sau" để thấy rõ sự khác biệt. Nhấn mạnh việc chuyển từ "ứng dụng rời rạc" sang "hệ điều hành nhất quán".',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Từ 'Silo' Rời rạc đến Hệ sinh thái Tích hợp.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-4">Chúng ta sẽ chuyển đổi từ các 'ứng dụng' nhân sự rời rạc sang một 'hệ điều hành' nhân sự nhất quán.</p>
+                <div class="flex justify-around w-full max-w-6xl">
+                    <div class="w-2/5 text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-red-400 mb-2">HIỆN TRẠNG: CÁC 'SILO' RỜI RẠC</h3>
+                        <svg viewBox="0 0 200 150" class="w-full">
+                            <style>.box{fill:#4a5568;}.text{font-size:10px;fill:white;font-family:Oswald}.line{stroke:#6b7280;stroke-dasharray:4,2}</style>
+                            <rect x="10" y="10" width="80" height="25" rx="5" class="box"/><text x="50" y="26" text-anchor="middle" class="text">Văn hóa (VIMERS)</text>
+                            <rect x="110" y="10" width="80" height="25" rx="5" class="box"/><text x="150" y="26" text-anchor="middle" class="text">Năng lực</text>
+                            <rect x="10" y="115" width="80" height="25" rx="5" class="box"/><text x="50" y="131" text-anchor="middle" class="text">Hiệu suất (KPI)</text>
+                            <rect x="110" y="115" width="80" height="25" rx="5" class="box"/><text x="150" y="131" text-anchor="middle" class="text">Đào tạo (LMS)</text>
+                            <path d="M50 35 L 50 115" class="line"/><path d="M150 35 L 150 115" class="line"/><path d="M90 22.5 L 110 22.5" class="line"/><path d="M90 127.5 L 110 127.5" class="line"/>
+                        </svg>
+                        <p contenteditable="true" class="text-lg">Gây lãng phí, thiếu nhất quán, và không liên kết chặt chẽ với chiến lược kinh doanh.</p>
+                    </div>
+                    <div class="w-2/5 text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-green-400 mb-2">TƯƠNG LAI: HỆ SINH THÁI TÍCH HỢP</h3>
+                        <svg viewBox="0 0 200 150" class="w-full">
+                            <style>.hub{fill:var(--color-primary-orange);}.spoke{fill:#4a5568}.text{font-size:10px;fill:white;font-family:Oswald}.line-solid{stroke:var(--color-primary-orange);}</style>
+                            <rect x="60" y="62.5" width="80" height="25" rx="5" class="hub"/><text x="100" y="78.5" text-anchor="middle" class="text">KHUNG NĂNG LỰC</text>
+                            <rect x="60" y="10" width="80" height="20" rx="5" class="spoke"/><text x="100" y="23" text-anchor="middle" class="text">Văn hóa</text>
+                            <rect x="10" y="65" width="40" height="20" rx="5" class="spoke"/><text x="30" y="78" text-anchor="middle" class="text">Tuyển dụng</text>
+                            <rect x="150" y="65" width="40" height="20" rx="5" class="spoke"/><text x="170" y="78" text-anchor="middle" class="text">Đào tạo</text>
+                            <rect x="60" y="120" width="80" height="20" rx="5" class="spoke"/><text x="100" y="133" text-anchor="middle" class="text">Hiệu suất & Đãi ngộ</text>
+                            <path d="M100 30 V 62.5" class="line-solid"/><path d="M100 87.5 V 120" class="line-solid"/><path d="M50 75 H 60" class="line-solid"/><path d="M140 75 H 150" class="line-solid"/>
+                        </svg>
+                        <p contenteditable="true" class="text-lg">Tạo ra ngôn ngữ chung, con đường sự nghiệp rõ ràng, sức mạnh cộng hưởng.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-10-new-synthesis',
+            type: 'bg-model',
+            notes: 'Tổng hợp Phần 1. Thông điệp cốt lõi là VIMID đang ở một điểm gãy chiến lược. Các hệ thống đã mang lại thành công trong quá khứ giờ đây lại là rào cản lớn nhất cho tăng trưởng trong tương lai. Slide này tạo ra sự căng thẳng và cấp bách cần thiết cho các giải pháp trong Phần 2.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">Điểm Gãy Chiến Lược: Nền tảng Cũ không thể Nâng đỡ Tầm nhìn Mới.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl">Những gì đã đưa chúng ta đến ngày hôm nay không thể đưa chúng ta đến nơi chúng ta muốn đến vào ngày mai.</p>
+            `
+        },
+        
+        // PHẦN 2: Lộ trình Chuyển đổi Toàn diện
+        { 
+            id: 'slide-11',
+            type: 'bg-structure',
+            notes: 'Bắt đầu phần 2, giới thiệu giải pháp tổng thể. Gồm 3 trụ cột chính sẽ giải quyết triệt để các vấn đề đã nêu.',
+            content: `
+                <h1 contenteditable="true" class="text-6xl font-bold">PHẦN 2</h1>
+                <h2 contenteditable="true" class="text-4xl font-light" style="color: var(--color-primary-orange);">Thay đổi như thế nào?</h2>
+                <div style="background-image: linear-gradient(rgba(26, 35, 126, 0.75), rgba(26, 35, 126, 0.75)), url(https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop); height:0px; width:0px;"></div>
+            `
+        },
+        {
+            id: 'slide-11-new-principles',
+            type: 'bg-interactive',
+            notes: 'Trước khi trình bày "cách làm", hãy thiết lập triết lý. Điều này xây dựng lòng tin và cho thấy sự chuyển đổi sẽ được quản lý một cách chu đáo, không chỉ áp đặt từ trên xuống.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Các Nguyên tắc Dẫn dắt cho Cuộc Chuyển đổi.</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl">
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                         <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Chiến lược Dẫn dắt</h3>
+                         <p contenteditable="true" class="text-lg">Mọi thay đổi đều phải xuất phát từ và phục vụ trực tiếp cho chiến lược kinh doanh.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                         <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Tiến hóa, không Cách mạng</h3>
+                         <p contenteditable="true" class="text-lg">Kế thừa nền tảng tốt, nâng cấp và tích hợp, không phá bỏ hoàn toàn.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                         <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Đồng sáng tạo</h3>
+                         <p contenteditable="true" class="text-lg">Thu hút sự tham gia của lãnh đạo chủ chốt để đảm bảo tính thực tiễn và cam kết.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-12',
+            notes: 'Trụ cột 1: Cấu trúc tổ chức. Cần một cấu trúc mới để hai khối Sản xuất và Kinh doanh có thể phối hợp nhịp nhàng.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-2">Trụ cột 1: Tái thiết kế Cấu trúc Tổ chức Tích hợp.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-1">Đề xuất <strong class="text-orange-400">Mô hình Hỗn hợp (Hybrid)</strong> để đảm bảo sự chuyên môn hóa và phối hợp nhịp nhàng.</p>
+                <svg viewBox="0 0 400 190" class="max-h-[280px] w-full">
+                    <style>.org-box{fill:#2d3748;stroke:#4a5568;stroke-width:1.5}.org-text{font-family:Oswald,sans-serif;fill:#e2e8f0;font-size:8px}.org-text-title{font-weight:700;font-size:10px;fill:var(--color-primary-orange)}.org-line{stroke:#4a5568;stroke-width:1.5;fill:none}</style>
+                    <rect x="150" y="5" width="100" height="30" rx="5" class="org-box"></rect>
+                    <text x="200" y="23" text-anchor="middle" class="org-text-title">Khối Hỗ trợ</text>
+                    <path d="M200 35V50M100 50H300M100 50V65M300 50V65" class="org-line"></path>
+                    <rect x="25" y="65" width="150" height="105" rx="5" class="org-box"></rect>
+                    <text x="100" y="80" text-anchor="middle" class="org-text-title">Khối Sản xuất</text>
+                    <text x="100" y="94" text-anchor="middle" class="org-text">- Kế hoạch & Vật tư</text>
+                    <text x="100" y="108" text-anchor="middle" class="org-text">- Mua hàng & Cung ứng</text>
+                    <text x="100" y="122" text-anchor="middle" class="org-text">- Sản xuất & Lắp ráp</text>
+                    <text x="100" y="136" text-anchor="middle" class="org-text">- Quản lý Chất lượng</text>
+                    <text x="100" y="150" text-anchor="middle" class="org-text">- R&D</text>
+                    <rect x="225" y="65" width="150" height="105" rx="5" class="org-box"></rect>
+                    <text x="300" y="80" text-anchor="middle" class="org-text-title">Khối KD & Dịch vụ</text>
+                    <text x="300" y="94" text-anchor="middle" class="org-text">- Marketing</text>
+                    <text x="300" y="108" text-anchor="middle" class="org-text">- Kinh doanh & Phân phối</text>
+                    <text x="300" y="122" text-anchor="middle" class="org-text">- Hệ thống Trạm 3S</text>
+                    <text x="300" y="136" text-anchor="middle" class="org-text">- Dịch vụ & Phụ tùng</text>
+                </svg>
+            `
+        },
+        {
+            id: 'slide-13-new',
+            type: 'bg-interactive',
+            notes: 'Giải thích lý do tại sao mô hình Hybrid là lựa chọn tối ưu cho VIMID ở giai đoạn này, bằng cách so sánh ngắn gọn với các mô hình phổ biến khác.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Tại sao là Mô hình Hỗn hợp (Hybrid)?</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-4">Mô hình này cân bằng giữa <strong class="text-blue-400">chuyên môn hóa sâu</strong> và <strong class="text-green-400">linh hoạt thị trường</strong>, là lựa chọn phù hợp nhất cho VIMID.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl text-left">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Ưu điểm chính</h3>
+                        <ul class="list-disc list-inside space-y-2 text-lg">
+                            <li contenteditable="true">Cho phép Khối Sản xuất tập trung tối đa vào hiệu quả & chất lượng.</li>
+                            <li contenteditable="true">Giữ cho Khối Kinh doanh & Dịch vụ sự nhạy bén với thị trường.</li>
+                            <li contenteditable="true">Tối ưu hóa nguồn lực hỗ trợ chung (HR, Finance, IT) cho toàn công ty.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">So với các mô hình khác</h3>
+                         <ul class="list-disc list-inside space-y-2 text-lg">
+                            <li contenteditable="true"><strong class="text-white">Mô hình SBU độc lập:</strong> Quá cồng kềnh & tốn kém cho quy mô hiện tại.</li>
+                            <li contenteditable="true"><strong class="text-white">Mô hình Ma trận:</strong> Quá phức tạp, dễ gây xung đột quyền lực trong giai đoạn chuyển đổi.</li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-13',
+            type: 'bg-model',
+            notes: 'Đây là trụ cột quan trọng nhất. Khung năng lực là xương sống kết nối mọi thứ. Slide này phải nhấn mạnh điều đó.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Trụ cột 2: Xây dựng Khung Năng lực VIMID - Sẵn sàng cho Tương lai.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl">Đây là "xương sống" liên kết chiến lược, văn hóa và quản trị nhân sự, thay thế khung năng lực lỗi thời từ 2019.</p>
+            `
+        },
+        {
+            id: 'slide-14-new',
+            type: 'bg-interactive',
+            notes: 'Slide này thể hiện sự nghiên cứu chuyên sâu, cho thấy khung năng lực của VIMID được xây dựng dựa trên việc học hỏi và tích hợp các phương pháp luận nhân sự hàng đầu thế giới.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Được xây dựng trên nền tảng các Phương pháp luận Toàn cầu.</h2>
+                 <p contenteditable="true" class="max-w-5xl text-xl mb-4">Chúng ta tích hợp những tinh hoa phù hợp nhất từ các trường phái hàng đầu để "may đo" cho VIMID.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl">
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Korn Ferry</h3>
+                        <p contenteditable="true" class="text-lg">Cung cấp bộ NĂNG LỰC LÃNH ĐẠO và các chỉ số hành vi đã được kiểm chứng toàn cầu.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-blue-400 mb-2">Mercer</h3>
+                        <p contenteditable="true" class="text-lg">Áp dụng phương pháp ĐÁNH GIÁ GIÁ TRỊ CÔNG VIỆC để xây dựng hệ thống cấp bậc và lương thưởng công bằng.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-green-400 mb-2">SHL</h3>
+                        <p contenteditable="true" class="text-lg">Tham khảo THƯ VIỆN NĂNG LỰC toàn diện để đảm bảo các định nghĩa đầy đủ và sắc bén.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-14',
+            type: 'bg-interactive',
+            notes: 'Giới thiệu mô hình năng lực 3 tầng. Đây là kiến trúc cốt lõi của giải pháp. Giải thích từng tầng một cách rõ ràng.',
+            content: `
+                 <h2 contenteditable="true" class="text-4xl mb-4">Kiến trúc Năng lực VIMID (Mô hình 3 Tầng Tích hợp).</h2>
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-7xl text-center">
+                    <div class="build-item border-2 border-orange-400 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold mb-2">Tầng 3: Lãnh đạo</h3>
+                        <p contenteditable="true" class="text-lg">Dẫn dắt thay đổi, phát triển đội ngũ, tư duy chiến lược.</p>
+                    </div>
+                    <div class="build-item border-2 border-blue-400 p-4 rounded-lg mt-0 md:mt-6">
+                        <h3 contenteditable="true" class="text-2xl font-bold mb-2">Tầng 2: Chuyên môn</h3>
+                        <p contenteditable="true" class="text-lg">Theo khối: Phân phối, Dịch vụ, và bộ năng lực mới cho SẢN XUẤT.</p>
+                    </div>
+                    <div class="build-item border-2 border-green-400 p-4 rounded-lg mt-0 md:mt-12">
+                        <h3 contenteditable="true" class="text-2xl font-bold mb-2">Tầng 1: Cốt lõi</h3>
+                        <p contenteditable="true" class="text-lg">DNA Văn hóa - "Vận hành hóa" 6 giá trị VIMERS, áp dụng cho TOÀN BỘ nhân viên.</p>
+                    </div>
+                 </div>
+            `
+        },
+        {
+            id: 'slide-15',
+            type: 'bg-model',
+            notes: 'Làm rõ hơn sức mạnh của mô hình 3 tầng. Nó vừa đảm bảo sự thống nhất về văn hóa, vừa thúc đẩy sự xuất sắc về chuyên môn. Đây là điểm hay của phương pháp luận này.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Phương pháp luận 3 Tầng: Chìa khóa cho sự cân bằng hoàn hảo.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-4">Mô hình này kiến tạo một tổ chức vừa <strong class="text-green-400">THỐNG NHẤT VỀ VĂN HÓA</strong>, vừa <strong class="text-blue-400">SẮC BÉN VỀ CHUYÊN MÔN</strong>.</p>
+                <div class="w-full max-w-4xl flex justify-center items-center">
+                    <svg viewBox="0 0 300 180" class="max-h-[300px]">
+                        <style>.tier-text{font-family:Oswald,sans-serif;font-size:12px;fill:white;text-anchor:middle;}.tier-desc{font-size:10px;fill:#cbd5e1;}.tier3{fill:var(--color-primary-orange);opacity:0.8}.tier2{fill:var(--color-primary-blue);opacity:0.8}.tier1{fill:var(--color-primary-green);opacity:0.8}</style>
+                        <path d="M 150,20 L 270,160 L 30,160 Z" class="tier1"/>
+                        <path d="M 150,20 L 230,113.3 L 70,113.3 Z" class="tier2"/>
+                        <path d="M 150,20 L 190,66.6 L 110,66.6 Z" class="tier3"/>
+                        <text x="150" y="50" class="tier-text">TẦNG 3: LÃNH ĐẠO</text>
+                        <text x="150" y="62" class="tier-text tier-desc">Xây dựng năng lực dẫn dắt tương lai</text>
+                        <text x="150" y="95" class="tier-text">TẦNG 2: CHUYÊN MÔN</text>
+                        <text x="150" y="107" class="tier-text tier-desc">Thúc đẩy chuyên môn hóa sâu</text>
+                        <text x="150" y="140" class="tier-text">TẦNG 1: CỐT LÕI (VIMERS)</text>
+                        <text x="150" y="152" class="tier-text tier-desc">Thống nhất DNA văn hóa toàn công ty</text>
+                    </svg>
+                </div>
+            `
+        },
+        {
+            id: 'slide-16',
+            notes: 'Mở rộng từ 2 ví dụ lên toàn bộ 6 giá trị cốt lõi, cho thấy sự toàn diện trong việc chuyển hóa văn hóa thành hành vi có thể đo lường được.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-2">Tầng 1: "Vận hành hóa" 6 giá trị VIMERS thành Năng lực Cốt lõi.</h2>
+                 <table class="table-auto w-full max-w-7xl text-left text-base bg-gray-800 rounded-lg">
+                    <thead class="sticky top-0"><tr class="bg-gray-700">
+                        <th class="p-2">Giá trị VIMERS</th>
+                        <th class="p-2">Năng lực Cốt lõi</th>
+                        <th class="p-2">Chỉ số Hành vi (Ví dụ)</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr class="border-t border-gray-600"><td class="p-2 font-bold text-orange-400" contenteditable="true">VALUE (GIÁ TRỊ)</td><td class="p-2" contenteditable="true">Tư duy Lấy khách hàng làm trung tâm</td><td class="p-2" contenteditable="true">Chủ động tìm hiểu và đáp ứng vượt mong đợi của khách hàng.</td></tr>
+                        <tr class="border-t border-gray-600"><td class="p-2 font-bold text-orange-400" contenteditable="true">INDEPENDENT (TỰ CHỦ)</td><td class="p-2" contenteditable="true">Chủ động & Tinh thần Trách nhiệm</td><td class="p-2" contenteditable="true">Tự giác thực hiện công việc mà không cần giám sát liên tục.</td></tr>
+                        <tr class="border-t border-gray-600"><td class="p-2 font-bold text-orange-400" contenteditable="true">MENTAL (TRÍ TUỆ)</td><td class="p-2" contenteditable="true">Học hỏi Liên tục & Đổi mới</td><td class="p-2" contenteditable="true">Tích cực tìm kiếm kiến thức mới và áp dụng vào công việc.</td></tr>
+                        <tr class="border-t border-gray-600"><td class="p-2 font-bold text-orange-400" contenteditable="true">EQUAL (CÂN BẰNG)</td><td class="p-2" contenteditable="true">Hợp tác Hiệu quả</td><td class="p-2" contenteditable="true">Lắng nghe và tôn trọng ý kiến của đồng nghiệp.</td></tr>
+                        <tr class="border-t border-gray-600"><td class="p-2 font-bold text-orange-400" contenteditable="true">RELIABLE (TIN CẬY)</td><td class="p-2" contenteditable="true">Cam kết Chất lượng & Chính trực</td><td class="p-2" contenteditable="true">Hoàn thành công việc đúng hạn với chất lượng đã cam kết.</td></tr>
+                        <tr class="border-t border-gray-600"><td class="p-2 font-bold text-orange-400" contenteditable="true">SHARE (CHIA SẺ)</td><td class="p-2" contenteditable="true">Phát triển Con người & Xây dựng Cộng đồng</td><td class="p-2" contenteditable="true">Sẵn lòng hướng dẫn, chia sẻ kinh nghiệm cho đồng nghiệp mới.</td></tr>
+                    </tbody>
+                </table>
+            `
+        },
+        {
+            id: 'slide-16-new-tier1-example',
+            type: 'bg-interactive',
+            notes: 'Đi sâu vào một ví dụ cụ thể để minh họa cách một năng lực được chia thành 5 cấp độ, từ cơ bản đến xuất sắc, làm cơ sở cho việc đánh giá và phát triển.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-2">Ví dụ: Từ điển Năng lực "Tư duy Lấy khách hàng làm trung tâm"</h2>
+                <div class="w-full max-w-6xl text-left text-sm">
+                    <table class="table-auto w-full bg-gray-800 rounded-lg">
+                        <thead class="bg-gray-700"><tr>
+                            <th class="p-2 w-1/6">Cấp độ</th><th class="p-2">Chỉ số hành vi</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-t border-gray-600"><td class="p-2 font-bold text-green-300">1. Cơ bản</td><td class="p-2" contenteditable="true">Hiểu và đáp ứng các yêu cầu rõ ràng của khách hàng một cách lịch sự, chuyên nghiệp.</td></tr>
+                            <tr class="border-t border-gray-600"><td class="p-2 font-bold text-green-400">2. Hiệu quả</td><td class="p-2" contenteditable="true">Chủ động tìm hiểu để làm rõ các nhu cầu ngầm của khách hàng và đưa ra giải pháp phù hợp.</td></tr>
+                            <tr class="border-t border-gray-600"><td class="p-2 font-bold text-green-500">3. Chủ động</td><td class="p-2" contenteditable="true">Tìm kiếm các giải pháp vượt mong đợi, tạo ra trải nghiệm tích cực và đáng nhớ cho khách hàng.</td></tr>
+                            <tr class="border-t border-gray-600"><td class="p-2 font-bold text-blue-400">4. Chiến lược</td><td class="p-2" contenteditable="true">Xây dựng mối quan hệ đối tác tin cậy, lâu dài với khách hàng; trở thành một nhà tư vấn đáng tin cậy.</td></tr>
+                            <tr class="border-t border-gray-600"><td class="p-2 font-bold text-blue-500">5. Dẫn dắt</td><td class="p-2" contenteditable="true">Định hình và dẫn dắt nhu cầu của khách hàng, tạo ra các giá trị mới mà khách hàng chưa nghĩ tới.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `
+        },
+        {
+            id: 'slide-16-new-tier2',
+            type: 'bg-interactive',
+            notes: 'Slide này minh họa các năng lực chuyên môn đặc thù cho từng khối kinh doanh, đặc biệt là bộ năng lực hoàn toàn mới cho khối Sản xuất.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Tầng 2: Năng lực Chuyên môn - Sắc bén trong từng Lĩnh vực.</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl text-left">
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-blue-400 mb-2">Sản xuất & Lắp ráp</h3>
+                        <ul class="list-disc list-inside space-y-2 text-lg">
+                            <li contenteditable="true">Tư duy Sản xuất Tinh gọn</li>
+                            <li contenteditable="true">Quản lý An toàn (HSE)</li>
+                            <li contenteditable="true">Quản lý Chất lượng (ISO)</li>
+                        </ul>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-blue-400 mb-2">Phân phối & Bán hàng</h3>
+                        <ul class="list-disc list-inside space-y-2 text-lg">
+                           <li contenteditable="true">Quản trị Kênh phân phối</li>
+                           <li contenteditable="true">Đàm phán & Thuyết phục</li>
+                           <li contenteditable="true">Quan hệ Khách hàng</li>
+                        </ul>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-blue-400 mb-2">Dịch vụ & Bảo trì</h3>
+                        <ul class="list-disc list-inside space-y-2 text-lg">
+                            <li contenteditable="true">Tư duy Dịch vụ Xuất sắc</li>
+                            <li contenteditable="true">Chẩn đoán Kỹ thuật</li>
+                            <li contenteditable="true">Quản lý Chất lượng Dịch vụ</li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-16-new-tier3',
+            type: 'bg-model',
+            notes: 'Minh họa 5 năng lực lãnh đạo cốt lõi, là những hành vi mà VIMID kỳ vọng ở đội ngũ quản lý để dẫn dắt công ty trong giai đoạn chuyển đổi.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Tầng 3: Năng lực Lãnh đạo - Dẫn dắt VIMID đến Tương lai.</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-6xl">
+                    <div class="build-item bg-gray-800 p-3 rounded-lg text-center"><h3 contenteditable="true" class="text-xl font-bold text-orange-400">Tư duy Chiến lược</h3></div>
+                    <div class="build-item bg-gray-800 p-3 rounded-lg text-center"><h3 contenteditable="true" class="text-xl font-bold text-orange-400">Dẫn dắt Sự thay đổi</h3></div>
+                    <div class="build-item bg-gray-800 p-3 rounded-lg text-center"><h3 contenteditable="true" class="text-xl font-bold text-orange-400">Quản trị Hiệu suất</h3></div>
+                    <div class="build-item bg-gray-800 p-3 rounded-lg text-center col-span-2 md:col-span-1"><h3 contenteditable="true" class="text-xl font-bold text-orange-400">Phát triển Đội ngũ</h3></div>
+                    <div class="build-item bg-gray-800 p-3 rounded-lg text-center"><h3 contenteditable="true" class="text-xl font-bold text-orange-400">Tầm nhìn Kinh doanh</h3></div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-16-new-tier3-details',
+            type: 'bg-interactive',
+            notes: 'Dựa trên Khung Năng lực Lãnh đạo của Korn Ferry, chúng ta sẽ tập trung vào 4 nhóm yếu tố chính để xây dựng nên một thế hệ lãnh đạo VIMID toàn diện.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Minh họa: 4 Nhóm Năng lực Lãnh đạo Cốt lõi.</h2>
+                <div class="grid grid-cols-2 grid-rows-2 gap-4 w-full max-w-5xl h-[320px]">
+                    <div class="build-item bg-blue-900/40 p-4 rounded-lg flex flex-col justify-center text-left">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-blue-300 mb-2"><i class="fas fa-brain mr-2"></i>TƯ DUY</h3>
+                        <ul class="list-disc list-inside text-lg">
+                            <li contenteditable="true">Tư duy Chiến lược</li>
+                            <li contenteditable="true">Tầm nhìn Kinh doanh</li>
+                            <li contenteditable="true">Năng lực Đổi mới</li>
+                        </ul>
+                    </div>
+                     <div class="build-item bg-green-900/40 p-4 rounded-lg flex flex-col justify-center text-left">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-green-300 mb-2"><i class="fas fa-bullseye mr-2"></i>KẾT QUẢ</h3>
+                        <ul class="list-disc list-inside text-lg">
+                            <li contenteditable="true">Quản trị Hiệu suất</li>
+                            <li contenteditable="true">Dẫn dắt Sự thay đổi</li>
+                            <li contenteditable="true">Ra quyết định Chất lượng</li>
+                        </ul>
+                    </div>
+                     <div class="build-item bg-yellow-900/40 p-4 rounded-lg flex flex-col justify-center text-left">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-yellow-300 mb-2"><i class="fas fa-users mr-2"></i>CON NGƯỜI</h3>
+                        <ul class="list-disc list-inside text-lg">
+                            <li contenteditable="true">Phát triển Đội ngũ</li>
+                            <li contenteditable="true">Tạo Ảnh hưởng</li>
+                            <li contenteditable="true">Xây dựng Đội nhóm</li>
+                        </ul>
+                    </div>
+                     <div class="build-item bg-indigo-900/40 p-4 rounded-lg flex flex-col justify-center text-left">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-indigo-300 mb-2"><i class="fas fa-user-astronaut mr-2"></i>BẢN THÂN</h3>
+                        <ul class="list-disc list-inside text-lg">
+                            <li contenteditable="true">Sự tự Nhận thức</li>
+                            <li contenteditable="true">Khả năng Thích ứng</li>
+                            <li contenteditable="true">Sự Kiên định</li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-17',
+            type: 'bg-model',
+            notes: 'Trụ cột 3: Đãi ngộ. Để thắng trong cuộc chiến nhân tài, không thể chỉ dựa vào lương. Cần một chiến lược "Tổng Đãi ngộ".',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Trụ cột 3: Thiết kế Hệ thống Tổng Đãi ngộ (Total Rewards).</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl">Để thu hút và giữ chân nhân tài cho khối sản xuất, chúng ta cần một chiến lược đãi ngộ toàn diện.</p>
+            `
+        },
+        {
+            id: 'slide-18',
+            type: 'bg-interactive',
+            notes: 'Làm rõ giá trị của Total Rewards so với 3P. Trong bối cảnh cạnh tranh nhân sự sản xuất, việc chỉ tập trung vào lương là không đủ. Chúng ta cần một "đề xuất giá trị" toàn diện hơn.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Vượt qua Lương 3P: Xây dựng 'Đề xuất Giá trị' không thể chối từ.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-4">Để thu hút 'đại bàng' ngành sản xuất, chúng ta không thể chỉ cạnh tranh bằng 'giá', mà phải bằng <strong class="text-orange-400">'giá trị'</strong>.</p>
+                <div class="flex justify-around w-full max-w-6xl">
+                    <div class="w-2/5 border border-gray-600 rounded-lg p-4">
+                        <h3 contenteditable="true" class="text-2xl font-bold mb-2">Hệ thống Lương 3P</h3>
+                        <ul class="text-left list-disc list-inside text-lg space-y-2">
+                            <li contenteditable="true">Tập trung vào Lương & Thưởng.</li>
+                            <li contenteditable="true">Là một công cụ tài chính.</li>
+                            <li contenteditable="true" class="text-red-400">Không đủ sức cạnh tranh với các tập đoàn lớn.</li>
+                            <li contenteditable="true" class="text-red-400">Không tạo ra sự gắn kết sâu sắc.</li>
+                        </ul>
+                    </div>
+                    <div class="w-2/5 border-2 border-green-400 rounded-lg p-4 bg-green-900/20">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-green-400 mb-2">Hệ thống Tổng Đãi ngộ</h3>
+                        <ul class="text-left list-disc list-inside text-lg space-y-2">
+                            <li contenteditable="true">Tập trung vào TOÀN BỘ trải nghiệm.</li>
+                            <li contenteditable="true">Là một chiến lược nhân tài.</li>
+                            <li contenteditable="true" class="text-green-400">Tạo ra Đề xuất Giá trị (EVP) độc đáo.</li>
+                            <li contenteditable="true" class="text-green-400">Xây dựng sự gắn kết bền vững.</li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-19',
+            type: 'bg-interactive',
+            notes: 'Giải thích mô hình Total Rewards. Bao gồm 4 cấu phần, không chỉ riêng lương thưởng. Đây là đề xuất giá trị toàn diện cho nhân viên (EVP).',
+            content: `
+                 <h2 contenteditable="true" class="text-4xl mb-4">Mô hình Tổng Đãi ngộ của VIMID.</h2>
+                 <div class="grid grid-cols-2 grid-rows-2 gap-4 w-full max-w-3xl h-64">
+                    <div class="build-item bg-orange-600/30 p-4 rounded-lg flex items-center justify-center"><h3 contenteditable="true" class="text-3xl font-bold">Lương thưởng</h3></div>
+                    <div class="build-item bg-green-600/30 p-4 rounded-lg flex items-center justify-center"><h3 contenteditable="true" class="text-3xl font-bold">Phúc lợi</h3></div>
+                    <div class="build-item bg-blue-600/30 p-4 rounded-lg flex items-center justify-center"><h3 contenteditable="true" class="text-3xl font-bold">Sự nghiệp</h3></div>
+                    <div class="build-item bg-indigo-600/30 p-4 rounded-lg flex items-center justify-center"><h3 contenteditable="true" class="text-3xl font-bold">Môi trường</h3></div>
+                 </div>
+                 <p contenteditable="true" class="mt-4 text-lg">Nguồn: Dựa trên phương pháp luận của Mercer</p>
+            `
+        },
+        {
+            id: 'slide-20-new',
+            type: 'bg-model',
+            notes: 'Slide này làm rõ nội hàm của 4 cấu phần trong mô hình Tổng Đãi ngộ, giúp Ban Lãnh đạo hình dung rõ hơn các hạng mục cần đầu tư để tạo ra một "đề xuất giá trị" hấp dẫn.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Bốn Cấu phần của Tổng Đãi ngộ Toàn diện.</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-7xl text-left">
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-coins mr-2"></i>Lương thưởng</h3>
+                        <ul class="list-disc list-inside text-base space-y-1">
+                            <li contenteditable="true">Lương cạnh tranh</li>
+                            <li contenteditable="true">Thưởng hiệu suất</li>
+                            <li contenteditable="true">Thưởng dài hạn (LTI)</li>
+                        </ul>
+                    </div>
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-green-400 mb-2"><i class="fas fa-shield-heart mr-2"></i>Phúc lợi</h3>
+                        <ul class="list-disc list-inside text-base space-y-1">
+                            <li contenteditable="true">Bảo hiểm sức khỏe</li>
+                            <li contenteditable="true">Chăm sóc tinh thần</li>
+                            <li contenteditable="true">Chế độ cho gia đình</li>
+                        </ul>
+                    </div>
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-blue-400 mb-2"><i class="fas fa-chart-line mr-2"></i>Sự nghiệp</h3>
+                        <ul class="list-disc list-inside text-base space-y-1">
+                            <li contenteditable="true">Lộ trình thăng tiến</li>
+                            <li contenteditable="true">Đào tạo chuyên sâu</li>
+                            <li contenteditable="true">Cơ hội luân chuyển</li>
+                        </ul>
+                    </div>
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-indigo-400 mb-2"><i class="fas fa-users mr-2"></i>Môi trường</h3>
+                        <ul class="list-disc list-inside text-base space-y-1">
+                            <li contenteditable="true">Văn hóa ghi nhận</li>
+                            <li contenteditable="true">Lãnh đạo truyền cảm hứng</li>
+                            <li contenteditable="true">Cân bằng công việc</li>
+                        </ul>
+                    </div>
+                </div>
+            `
+        },
+        
+        // PHẦN 3: Kế hoạch Triển khai & Tích hợp
+        { 
+            id: 'slide-20',
+            type: 'bg-structure',
+            notes: 'Bắt đầu phần 3. Có kế hoạch tốt là chưa đủ, cần triển khai và tích hợp hiệu quả. Đây là phần "làm thế nào".',
+            content: `
+                <h1 contenteditable="true" class="text-6xl font-bold">PHẦN 3</h1>
+                <h2 contenteditable="true" class="text-4xl font-light" style="color: var(--color-primary-orange);">Làm sao để Thành công?</h2>
+                 <div style="background-image: linear-gradient(rgba(26, 35, 126, 0.75), rgba(26, 35, 126, 0.75)), url(https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2940&auto=format&fit=crop); height:0px; width:0px;"></div>
+            `
+        },
+        {
+            id: 'slide-21',
+            notes: 'Trình bày lộ trình triển khai theo 3 giai đoạn. Việc chia giai đoạn giúp quản lý rủi ro và đảm bảo sự tiếp nhận của tổ chức. Lộ trình đã được cập nhật để phản ánh thời gian hiện tại.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-2">Lộ trình Triển khai Đề xuất (Cập nhật).</h2>
+                <div class="w-full max-w-6xl">
+                    <div class="relative mt-2">
+                        <div class="absolute h-full border-l-4 border-gray-600 left-1/2 -translate-x-1/2"></div>
+                        <div class="build-item flex items-center mb-3">
+                            <div class="w-1/2 text-right pr-8"><h3 contenteditable="true" class="text-xl font-bold text-orange-400">GĐ 1: Thiết kế & Chuẩn bị</h3><p contenteditable="true" class="text-lg">Q4/2025</p></div>
+                            <div class="w-8 h-8 bg-orange-400 rounded-full z-10"></div>
+                            <div class="w-1/2 pl-8"><p contenteditable="true" class="text-left text-lg">Hoàn thiện thiết kế & kế hoạch truyền thông.</p></div>
+                        </div>
+                        <div class="build-item flex items-center mb-3">
+                             <div class="w-1/2 pr-8 text-right"><p contenteditable="true" class="text-lg">Triển khai thử nghiệm tại các phòng ban đại diện.</p></div>
+                            <div class="w-1/2 pl-8 text-left"><h3 contenteditable="true" class="text-xl font-bold text-blue-400">GĐ 2: Thử nghiệm & Hiệu chỉnh</h3><p contenteditable="true" class="text-lg">Q1/2026</p></div>
+                            <div class="w-8 h-8 bg-blue-400 rounded-full z-10 absolute left-1/2 -translate-x-1/2"></div>
+                        </div>
+                        <div class="build-item flex items-center">
+                            <div class="w-1/2 text-right pr-8"><h3 contenteditable="true" class="text-xl font-bold text-green-400">GĐ 3: Triển khai Toàn diện</h3><p contenteditable="true" class="text-lg">Q2 - Q3/2026</p></div>
+                            <div class="w-8 h-8 bg-green-400 rounded-full z-10"></div>
+                            <div class="w-1/2 pl-8"><p contenteditable="true" class="text-left text-lg">Đào tạo và áp dụng đồng bộ hệ thống mới.</p></div>
+                        </div>
+                    </div>
+                </div>
+            `
+        },
+         {
+            id: 'slide-21-new-change-mgt',
+            type: 'bg-model',
+            notes: 'Đây là một bổ sung quan trọng. Bất kỳ dự án nhân sự lớn nào cũng thất bại nếu không có quản trị sự thay đổi đúng đắn. Slide này thể hiện sự chuyên môn và tăng khả năng thành công.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Yếu tố Thành công Then chốt: Quản trị Sự thay đổi.</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl">
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-green-400 mb-2">Sự bảo trợ của Lãnh đạo</h3>
+                        <p contenteditable="true" class="text-lg">BLĐ phải là những người tiên phong, truyền cảm hứng và loại bỏ các rào cản.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-green-400 mb-2">Truyền thông Nhất quán</h3>
+                        <p contenteditable="true" class="text-lg">Trả lời câu hỏi "Tại sao?" và "Điều này có ý nghĩa gì với tôi?" một cách minh bạch.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg text-center">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-green-400 mb-2">Trao quyền cho Đội ngũ</h3>
+                        <p contenteditable="true" class="text-lg">Xây dựng đội ngũ 'đại sứ thay đổi' và cung cấp công cụ cho các nhà quản lý.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-22',
+            type: 'bg-model',
+            notes: 'Slide này giải thích cách chúng ta tạo ra sức mạnh cộng hưởng. Khung Năng lực sẽ được tích hợp vào Quản trị Hiệu suất.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Tái định nghĩa Hiệu suất: Kết quả phải đi đôi với Hành vi.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-4">Biểu mẫu đánh giá mới sẽ trả lời hai câu hỏi quan trọng: Bạn đã làm được GÌ? và bạn đã làm điều đó NHƯ THẾ NÀO?</p>
+                <div class="flex space-x-8">
+                    <div class="build-item bg-gray-800 p-6 rounded-lg w-72 text-center">
+                        <h3 contenteditable="true" class="text-3xl font-bold text-green-400">WHAT</h3>
+                        <p contenteditable="true" class="mt-2 text-xl">Mức độ hoàn thành KPIs.</p>
+                    </div>
+                    <div class="text-5xl font-bold self-center">+</div>
+                     <div class="build-item bg-gray-800 p-6 rounded-lg w-72 text-center">
+                        <h3 contenteditable="true" class="text-3xl font-bold text-orange-400">HOW</h3>
+                        <p contenteditable="true" class="mt-2 text-xl">Mức độ thể hiện các hành vi trong Khung Năng lực.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-22-new',
+            type: 'bg-interactive',
+            notes: 'Slide này là cầu nối quan trọng, cho thấy hệ thống mới không phải là phá bỏ cái cũ, mà là nâng cấp hệ thống lương 3P hiện tại lên một tầm cao mới, logic và liên kết hơn.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Tích hợp Năng lực vào Lương 3P: Nâng cấp, không Phá bỏ.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-4">Chúng ta sẽ làm cho hệ thống 3P trở nên minh bạch, công bằng và gắn kết chặt chẽ hơn với chiến lược.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl text-center">
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">P1: Position (Vị trí)</h3>
+                        <p contenteditable="true" class="text-lg">Sử dụng phương pháp <strong class="text-white">Mercer IPE</strong> để đánh giá giá trị công việc, xây dựng <strong class="text-white">hệ thống cấp bậc & dải lương</strong> cạnh tranh.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">P2: Person (Con người)</h3>
+                        <p contenteditable="true" class="text-lg">Đánh giá nhân viên dựa trên <strong class="text-white">Khung Năng lực</strong>. Kết quả là cơ sở để <strong class="text-white">xét duyệt lương & lộ trình phát triển</strong> cá nhân.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">P3: Performance (Hiệu suất)</h3>
+                        <p contenteditable="true" class="text-lg">Đánh giá dựa trên <strong class="text-white">"WHAT" (KPIs)</strong> và <strong class="text-white">"HOW" (Năng lực)</strong>. Kết quả quyết định các khoản <strong class="text-white">thưởng hiệu suất</strong> toàn diện.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-22-new-9box',
+            type: 'bg-interactive',
+            notes: 'Ma trận 9-Box là công cụ trực quan để phân loại nhân viên dựa trên 2 trục Kết quả và Hành vi, từ đó đưa ra các quyết định nhân sự phù hợp.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-2">Ma trận Đánh giá Hiệu suất Toàn diện (9-Box)</h2>
+                <p contenteditable="true" class="text-lg mb-2">Kết hợp "WHAT" (Kết quả) và "HOW" (Hành vi) để có cái nhìn đa chiều về nhân sự.</p>
+                <div class="w-full max-w-4xl aspect-square p-4 grid grid-cols-4 grid-rows-4 text-xs md:text-sm" style="background-image: linear-gradient(to right, #4a5568 1px, transparent 1px), linear-gradient(to bottom, #4a5568 1px, transparent 1px); background-size: calc(100%/3) calc(100%/3);">
+                    <div class="row-start-4 flex items-center justify-center font-bold text-lg -rotate-90 origin-bottom-left">Kết quả (WHAT)</div>
+                    <div class="col-start-2 col-span-3 flex items-center justify-center font-bold text-lg">Hành vi (HOW)</div>
+                    <div class="row-start-3 flex items-center justify-center -rotate-90">Thấp</div>
+                    <div class="row-start-2 flex items-center justify-center -rotate-90">Vừa</div>
+                    <div class="row-start-1 flex items-center justify-center -rotate-90">Cao</div>
+                    <div class="col-start-2 flex items-center justify-center">Thấp</div>
+                    <div class="col-start-3 flex items-center justify-center">Vừa</div>
+                    <div class="col-start-4 flex items-center justify-center">Cao</div>
+                    <div class="col-start-2 row-start-3 bg-red-800/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Nguy cơ</strong><p contenteditable="true">Cân nhắc thay thế</p></div>
+                    <div class="col-start-3 row-start-3 bg-yellow-700/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Cần cải thiện</strong><p contenteditable="true">Lập kế hoạch cải thiện</p></div>
+                    <div class="col-start-4 row-start-3 bg-yellow-600/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Nhân viên tiềm năng</strong><p contenteditable="true">Huấn luyện, phát triển</p></div>
+                    <div class="col-start-2 row-start-2 bg-yellow-700/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Nhân viên tròn vai</strong><p contenteditable="true">Ghi nhận, duy trì</p></div>
+                    <div class="col-start-3 row-start-2 bg-green-700/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Nhân viên cốt lõi</strong><p contenteditable="true">Giữ chân, trao quyền</p></div>
+                    <div class="col-start-4 row-start-2 bg-green-600/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Ngôi sao tiềm năng</strong><p contenteditable="true">Thử thách, phát triển</p></div>
+                    <div class="col-start-2 row-start-1 bg-yellow-600/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Chuyên gia</strong><p contenteditable="true">Khai thác chuyên môn</p></div>
+                    <div class="col-start-3 row-start-1 bg-green-600/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Lãnh đạo tương lai</strong><p contenteditable="true">Phát triển lãnh đạo</p></div>
+                    <div class="col-start-4 row-start-1 bg-teal-500/50 flex flex-col justify-center p-1 rounded"><strong contenteditable="true">Ngôi sao</strong><p contenteditable="true">Thăng tiến, tưởng thưởng</p></div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-22-new-payout',
+            type: 'bg-model',
+            notes: 'Minh họa cách kết quả đánh giá hiệu suất được chuyển thành các quyết định đãi ngộ cụ thể, từ thưởng đến phát triển sự nghiệp.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Liên kết Hiệu suất với Đãi ngộ & Phát triển</h2>
+                <p contenteditable="true" class="text-lg mb-4">Đảm bảo sự công bằng và ghi nhận xứng đáng cho những đóng góp toàn diện.</p>
+                <div class="w-full max-w-6xl">
+                    <table class="table-auto w-full bg-gray-800 rounded-lg text-left">
+                        <thead class="bg-gray-700"><tr>
+                            <th class="p-3">Xếp hạng Hiệu suất</th>
+                            <th class="p-3">Mô tả</th>
+                            <th class="p-3">Mức thưởng đề xuất</th>
+                            <th class="p-3">Hành động Phát triển</th>
+                        </tr></thead>
+                        <tbody>
+                            <tr class="border-t border-gray-600">
+                                <td class="p-3 font-bold text-teal-400" contenteditable="true">Ngôi sao</td>
+                                <td class="p-3" contenteditable="true">Vượt trội cả Kết quả và Hành vi</td>
+                                <td class="p-3" contenteditable="true">120% - 150% thưởng mục tiêu</td>
+                                <td class="p-3" contenteditable="true">Ưu tiên thăng tiến, giao dự án thách thức</td>
+                            </tr>
+                            <tr class="border-t border-gray-600">
+                                <td class="p-3 font-bold text-green-400" contenteditable="true">Nhân viên Cốt lõi</td>
+                                <td class="p-3" contenteditable="true">Hoàn thành tốt Kết quả, thể hiện tốt Hành vi</td>
+                                <td class="p-3" contenteditable="true">100% - 110% thưởng mục tiêu</td>
+                                <td class="p-3" contenteditable="true">Ghi nhận, trao thêm quyền</td>
+                            </tr>
+                             <tr class="border-t border-gray-600">
+                                <td class="p-3 font-bold text-yellow-400" contenteditable="true">Cần cải thiện</td>
+                                <td class="p-3" contenteditable="true">Chưa đạt 1 trong 2 hoặc cả 2 mặt</td>
+                                <td class="p-3" contenteditable="true">70% - 90% thưởng mục tiêu</td>
+                                <td class="p-3" contenteditable="true">Lập kế hoạch cải thiện hiệu suất (PIP)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `
+        },
+        {
+            id: 'slide-23',
+            type: 'bg-model',
+            notes: 'Tương tự, Khung Năng lực sẽ được tích hợp với hệ thống LMS, biến LMS thành một công cụ phát triển cá nhân hóa.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-2">Tạo ra Vòng lặp Phát triển Nhân tài Liên tục.</h2>
+                <p contenteditable="true" class="max-w-5xl text-xl mb-2">Liên kết LMS với Khung Năng lực, biến việc phát triển thành một hành trình cá nhân hóa.</p>
+                <svg viewBox="0 0 300 165" class="max-h-[240px] w-full">
+                    <defs><marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-primary-orange)" /></marker></defs>
+                    <style>.loop-box{fill:#2d3748;stroke:var(--color-primary-blue);stroke-width:1}.loop-text{font-family:Oswald,sans-serif;font-size:10px;fill:#e2e8f0;text-anchor:middle}.loop-arrow{stroke:var(--color-primary-orange);stroke-width:1.5;fill:none;marker-end:url(#arrowhead)}</style>
+                    <g transform="translate(40,25)"><rect width="80" height="25" rx="3" class="loop-box"></rect><text x="40" y="16" class="loop-text">1. Đánh giá</text></g>
+                    <g transform="translate(180,25)"><rect width="80" height="25" rx="3" class="loop-box"></rect><text x="40" y="16" class="loop-text">2. Xác định Lỗ hổng</text></g>
+                    <g transform="translate(180,115)"><rect width="80" height="25" rx="3" class="loop-box"></rect><text x="40" y="16" class="loop-text">3. Lập Kế hoạch PT</text></g>
+                    <g transform="translate(40,115)"><rect width="80" height="25" rx="3" class="loop-box"></rect><text x="40" y="16" class="loop-text">4. Học tập & Áp dụng</text></g>
+                    <path d="M 120 37.5 L 180 37.5" class="loop-arrow"></path>
+                    <path d="M 220 50 V 115" class="loop-arrow"></path>
+                    <path d="M 180 127.5 L 120 127.5" class="loop-arrow"></path>
+                    <path d="M 80 115 V 50" class="loop-arrow"></path>
+                </svg>
+            `
+        },
+        {
+            id: 'slide-23-new-integration-model',
+            type: 'bg-interactive',
+            notes: 'Đây là slide tổng kết toàn bộ hệ thống, cho thấy mọi quy trình nhân sự được kết nối với nhau một cách logic, với Khung Năng lực làm trung tâm.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Mô hình Tích hợp Chiến lược Vốn Nhân lực VIMID</h2>
+                <p contenteditable="true" class="text-lg mb-2">Một 'hệ điều hành' duy nhất, kết nối mọi quy trình nhân sự.</p>
+                <svg viewBox="0 0 500 320" class="w-full max-w-5xl">
+                    <defs>
+                        <marker id="arrowhead-int" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#FF9800" /></marker>
+                    </defs>
+                    <style>
+                        .int-box { fill: #2d3748; stroke: #4a5568; stroke-width: 1.5; }
+                        .int-hub { fill: #FF9800; }
+                        .int-hub-text { font: bold 14px 'Oswald', sans-serif; fill: black; text-anchor: middle; }
+                        .int-title { font: bold 12px 'Oswald', sans-serif; fill: #FF9800; text-anchor: middle; }
+                        .int-desc { font: 10px 'Oswald', sans-serif; fill: #E5E7EB; text-anchor: middle; }
+                        .int-source { font: italic 9px 'Oswald', sans-serif; fill: #9ca3af; text-anchor: middle; }
+                        .int-arrow { stroke: #FF9800; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead-int); }
+                    </style>
+                    <!-- Center Hub -->
+                    <rect x="175" y="125" width="150" height="70" rx="8" class="int-hub" />
+                    <text x="250" y="145" class="int-hub-text">KHUNG NĂNG LỰC</text>
+                    <text x="250" y="160" class="int-hub-text">VIMID</text>
+                    <text x="250" y="180" class="int-source">(Korn Ferry, SHL, Mercer)</text>
+
+                    <!-- Input Arrow -->
+                    <path d="M 125 160 H 175" class="int-arrow" />
+                    <rect x="5" y="140" width="120" height="40" rx="5" class="int-box" />
+                    <text x="65" y="157" class="int-title">CHIẾN LƯỢC & VĂN HÓA</text>
+                    <text x="65" y="170" class="int-desc">Tầm nhìn, Giá trị VIMERS</text>
+
+                    <!-- Output Boxes -->
+                    <path d="M 325 160 H 375 M 375 70 V 250" class="int-arrow" />
+                    
+                    <rect x="375" y="10" width="120" height="40" rx="5" class="int-box" />
+                    <text x="435" y="27" class="int-title">1. THU HÚT & TUYỂN DỤNG</text>
+                    <text x="435" y="40" class="int-desc">Phỏng vấn hành vi</text>
+
+                    <rect x="375" y="70" width="120" height="40" rx="5" class="int-box" />
+                    <text x="435" y="87" class="int-title">2. QUẢN TRỊ HIỆU SUẤT</text>
+                    <text x="435" y="100" class="int-desc">Đánh giá WHAT + HOW</text>
+
+                    <rect x="375" y="130" width="120" height="40" rx="5" class="int-box" />
+                    <text x="435" y="147" class="int-title">3. ĐÃI NGỘ & KHEN THƯỞNG</text>
+                    <text x="435" y="160" class="int-desc">Thưởng, Tăng lương</text>
+
+                    <rect x="375" y="190" width="120" height="40" rx="5" class="int-box" />
+                    <text x="435" y="207" class="int-title">4. ĐÀO TẠO & PHÁT TRIỂN</text>
+                    <text x="435" y="220" class="int-desc">Lộ trình học tập cá nhân</text>
+
+                    <rect x="375" y="250" width="120" height="40" rx="5" class="int-box" />
+                    <text x="435" y="267" class="int-title">5. HOẠCH ĐỊNH KẾ THỪA</text>
+                    <text x="435" y="280" class="int-desc">Xác định nhân tài kế cận</text>
+                </svg>
+            `
+        },
+        {
+            id: 'slide-23-new-workflow-example',
+            type: 'bg-interactive',
+            notes: 'Đây là slide then chốt để biến lý thuyết thành thực tiễn. Dùng ví dụ này để cho thấy hệ thống không chỉ là các quy trình giấy tờ, mà là một công cụ sống động để quản lý và phát triển con người, gắn liền với kết quả kinh doanh.',
+            content: `
+                <h2 contenteditable="true" class="text-4xl mb-4">Minh họa Dòng chảy Tích hợp trong Thực tế</h2>
+                <p contenteditable="true" class="text-lg mb-2">Ví dụ: Vòng đời Quản trị Hiệu suất của một Giám đốc Kinh doanh Vùng</p>
+                <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-4 gap-4 text-left text-base mt-2">
+                    <!-- Step 1 -->
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-flag-checkered mr-2"></i>1. Thiết lập Mục tiêu</h3>
+                        <p contenteditable="true" class="mb-1"><strong>WHAT (KPIs):</strong> Tăng doanh thu 15%, thị phần 2%.</p>
+                        <p contenteditable="true"><strong>HOW (Năng lực):</strong> Tập trung phát triển đội ngũ bán hàng kế thừa.</p>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-clipboard-check mr-2"></i>2. Đánh giá Cuối kỳ</h3>
+                        <p contenteditable="true" class="mb-1"><strong>Kết quả:</strong> Doanh thu tăng 18% (Vượt), thị phần 1.5% (Đạt).</p>
+                        <p contenteditable="true"><strong>Hành vi:</strong> Tích cực huấn luyện, 2 nhân sự được đề bạt. Đạt cấp độ 4/5 năng lực 'Phát triển Đội ngũ'.</p>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-th mr-2"></i>3. Hiệu chỉnh (9-Box)</h3>
+                        <p contenteditable="true">Với kết quả cao và hành vi tốt, GĐKD được xếp vào ô <strong class="text-teal-400">'Ngôi sao'</strong> hoặc <strong class="text-green-400">'Lãnh đạo Tương lai'</strong>.</p>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="build-item bg-gray-800 p-3 rounded-lg">
+                        <h3 contenteditable="true" class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-trophy mr-2"></i>4. Ra quyết định</h3>
+                        <p contenteditable="true" class="mb-1"><strong>Đãi ngộ:</strong> Nhận 130% thưởng hiệu suất, xem xét tăng lương vượt khung.</p>
+                        <p contenteditable="true"><strong>Phát triển:</strong> Được đưa vào danh sách nhân tài kế thừa, tham gia chương trình đào tạo lãnh đạo cấp cao.</p>
+                    </div>
+                </div>
+            `
+        },
+
+        // PHẦN 4: Đo lường & Kêu gọi Hành động
+        { 
+            id: 'slide-24',
+            type: 'bg-structure',
+            notes: 'Phần cuối cùng. Chúng ta cần cho Ban Lãnh đạo thấy cách đo lường thành công và kêu gọi họ hành động.',
+            content: `
+                <h1 contenteditable="true" class="text-6xl font-bold">PHẦN 4</h1>
+                <h2 contenteditable="true" class="text-4xl font-light" style="color: var(--color-primary-orange);">Đo lường ra sao?</h2>
+                 <div style="background-image: linear-gradient(rgba(26, 35, 126, 0.75), rgba(26, 35, 126, 0.75)), url(https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=2874&auto=format&fit=crop); height:0px; width:0px;"></div>
+            `
+        },
+        {
+            id: 'slide-25',
+            notes: 'Làm thế nào để biết dự án thành công? Trình bày các chỉ số đo lường cụ thể (Metrics) mà chúng ta sẽ theo dõi.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">Đo lường thành công qua các chỉ số Tác động Kinh doanh.</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-7xl">
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Tác động Nhân tài</h3>
+                        <p contenteditable="true" class="text-lg">- Giảm tỷ lệ nghỉ việc (nhân tài).<br>- Rút ngắn thời gian tuyển dụng.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Tác động Hiệu suất</h3>
+                        <p contenteditable="true" class="text-lg">- Tăng điểm năng lực TB.<br>- Tăng tỷ lệ đạt/vượt KPI.</p>
+                    </div>
+                    <div class="build-item bg-gray-800 p-4 rounded-lg">
+                        <h3 contenteditable="true" class="text-2xl font-bold text-orange-400 mb-2">Tác động Văn hóa</h3>
+                        <p contenteditable="true" class="text-lg">- Tăng điểm khảo sát gắn kết.<br>- Tăng tỷ lệ thăng tiến nội bộ.</p>
+                    </div>
+                </div>
+            `
+        },
+        {
+            id: 'slide-26',
+            type: 'bg-interactive',
+            notes: 'Đây là slide tương tác. Chúng ta có thể dùng biểu đồ để minh họa ROI dự kiến. Cho phép người xem thấy được lợi ích tài chính của dự án.',
+            content: `
+                 <h2 contenteditable="true" class="text-5xl mb-2">Phân tích Hiệu quả Đầu tư (ROI) của dự án.</h2>
+                 <p contenteditable="true" class="max-w-5xl text-xl mb-2">Đầu tư vào con người là một khoản đầu tư mang lại lợi ích tài chính cụ thể.</p>
+                 <div class="w-full max-w-3xl h-52">
+                    <canvas id="roiChart"></canvas>
+                 </div>
+            `
+        },
+        {
+            id: 'slide-27',
+            notes: 'Slide kêu gọi hành động. Rõ ràng, mạnh mẽ, và hướng tới các quyết định cụ thể cần được đưa ra ngay sau buổi họp.',
+            content: `
+                <h2 contenteditable="true" class="text-5xl mb-4">Đề xuất các bước đi Tiếp theo.</h2>
+                <div class="text-left w-full max-w-5xl text-2xl space-y-2">
+                    <p contenteditable="true" class="build-item"><strong class="text-orange-400">1. THỐNG NHẤT CHỦ TRƯƠNG:</strong> Xin ý kiến chỉ đạo và sự đồng thuận của BLĐ về định hướng đã trình bày.</p>
+                    <p contenteditable="true" class="build-item"><strong class="text-orange-400">2. THÀNH LẬP BAN DỰ ÁN:</strong> Đề xuất thành lập ban dự án chuyên trách, quy tụ nhân sự cốt cán từ các khối.</p>
+                    <p contenteditable="true" class="build-item"><strong class="text-orange-400">3. ỦY QUYỀN HÀNH ĐỘNG:</strong> Phê duyệt nguồn lực để dự án chính thức khởi động, mục tiêu vào Q4/2025.</p>
+                </div>
+            `
+        },
+        { 
+            id: 'slide-28',
+            type: 'bg-structure',
+            notes: 'Kết thúc bằng một lời cảm ơn và mở ra phần thảo luận. Thể hiện sự sẵn sàng lắng nghe và giải đáp.',
+            content: `
+                <h1 contenteditable="true" class="text-6xl font-bold">TRÂN TRỌNG CẢM ƠN</h1>
+                <h2 contenteditable="true" class="text-4xl font-light mt-4" style="color: var(--color-primary-orange);">Q&A</h2>
+                 <div style="background-image: linear-gradient(rgba(26, 35, 126, 0.75), rgba(26, 35, 126, 0.75)), url(https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2940&auto=format&fit=crop); height:0px; width:0px;"></div>
+            `
+        },
+    ];
+
+    // --- SCRIPT ---
+
+    const slidesContainer = document.getElementById('slides-container');
+    const progressBar = document.getElementById('progress-bar');
+    const pageNumberDisplay = document.getElementById('page-number-display');
+
+    slidesData.forEach((slide, index) => {
+        const slideEl = document.createElement('div');
+        slideEl.className = `slide ${slide.type || 'bg-structure'}`;
+        slideEl.id = slide.id;
+        if (slide.notes) slideEl.dataset.notes = slide.notes;
+        slideEl.innerHTML = `<div class="slide-content-wrapper">${slide.content}</div>`;
+        slidesContainer.appendChild(slideEl);
+
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        dot.dataset.index = index;
+        progressBar.appendChild(dot);
+    });
+    
+    let currentSlide = 0;
+    let presenterWindow = null;
+    let controlsTimeout;
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.progress-dot');
+
+    function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach((s, i) => s.classList.toggle('active', i === index));
+        dots.forEach((d, i) => d.classList.toggle('active', i === index));
+        currentSlide = index;
+        pageNumberDisplay.textContent = `${index + 1} / ${slides.length}`;
+        resetBuildAnimations(index);
+        if (presenterWindow && !presenterWindow.closed) updatePresenterWindow();
+        saveState();
+    }
+    
+    function nextSlide() { if (currentSlide < slides.length - 1) showSlide(currentSlide + 1); }
+    function prevSlide() { if (currentSlide > 0) showSlide(currentSlide - 1); }
+    
+    function resetBuildAnimations(slideIndex) {
+        slides.forEach((slide, index) => {
+            const items = slide.querySelectorAll('.build-item');
+            if (index !== slideIndex) {
+                items.forEach(item => item.classList.add('visible'));
+            } else {
+                 items.forEach(item => item.classList.remove('visible'));
+            }
+        });
+    }
+
+    function triggerNextBuild() {
+        const itemsToBuild = slides[currentSlide].querySelectorAll('.build-item:not(.visible)');
+        if (itemsToBuild.length > 0) {
+            itemsToBuild[0].classList.add('visible');
+            return true;
+        }
+        return false;
+    }
+
+    function openPresenterWindow() {
+        presenterWindow = window.open('', 'Presenter View', 'width=1200,height=700');
+        if (!presenterWindow) { 
+             console.log('Please allow pop-ups for this feature to work.');
+             return; 
+        }
+        presenterWindow.document.body.innerHTML = `
+            <style>body{font-family:sans-serif;display:flex;height:100vh;margin:0;background-color:#111;color:white}.main{flex-grow:1;display:flex;flex-direction:column;padding:1rem}.side{width:300px;padding:1rem;border-left:1px solid #444;display:flex;flex-direction:column}.slide-preview{border:1px solid #555;background-color:#222;overflow:hidden;transform-origin:top left}#current-slide-view{flex-grow:1}#next-slide-view{height:180px;margin-bottom:1rem}#notes{flex-grow:1;overflow-y:auto;background:#222;padding:1rem;border-radius:8px;font-size:1.2rem;line-height:1.5}#timer{font-size:2rem;text-align:center;margin-bottom:1rem}</style>
+            <div class="main"><h2>Current Slide</h2><div id="current-slide-view" class="slide-preview"></div></div>
+            <div class="side"><div id="timer">00:00:00</div><h2>Next Slide</h2><div id="next-slide-view" class="slide-preview"></div><h2>Notes</h2><div id="notes"></div></div>`;
+        let startTime = Date.now();
+        setInterval(() => {
+            if (presenterWindow.closed) return;
+            const elapsed = new Date(Date.now() - startTime);
+            const h = String(elapsed.getUTCHours()).padStart(2,'0'), m = String(elapsed.getUTCMinutes()).padStart(2,'0'), s = String(elapsed.getUTCSeconds()).padStart(2,'0');
+            presenterWindow.document.getElementById('timer').textContent = `${h}:${m}:${s}`;
+        }, 1000);
+        updatePresenterWindow();
+    }
+    
+    function updatePresenterWindow() {
+        if (!presenterWindow || presenterWindow.closed) return;
+        const currentView = presenterWindow.document.getElementById('current-slide-view');
+        const nextView = presenterWindow.document.getElementById('next-slide-view');
+        const notesView = presenterWindow.document.getElementById('notes');
+        const currentSlideContent = slides[currentSlide].cloneNode(true);
+        currentSlideContent.style.position = 'relative';
+        currentView.innerHTML = '';
+        currentView.appendChild(currentSlideContent);
+        scalePreview(currentSlideContent, currentView);
+        if (currentSlide + 1 < slides.length) {
+            const nextSlideContent = slides[currentSlide + 1].cloneNode(true);
+            nextSlideContent.style.position = 'relative';
+            nextView.innerHTML = '';
+            nextView.appendChild(nextSlideContent);
+            scalePreview(nextSlideContent, nextView);
+        } else {
+            nextView.innerHTML = '<p style="text-align:center;">End of presentation</p>';
+        }
+        notesView.textContent = slides[currentSlide].dataset.notes || 'No notes for this slide.';
+    }
+
+    function scalePreview(slideContent, container) {
+        const scale = Math.min(container.clientWidth / 1200, container.clientHeight / (1200 * 9 / 16));
+        slideContent.style.transform = `scale(${scale})`;
+    }
+
+    function setupControls() {
+        document.getElementById('next-btn').addEventListener('click', () => { if (!triggerNextBuild()) nextSlide(); });
+        document.getElementById('prev-btn').addEventListener('click', prevSlide);
+        document.getElementById('fullscreen-btn').addEventListener('click', toggleFullScreen);
+        document.getElementById('presenter-view-btn').addEventListener('click', openPresenterWindow);
+        document.getElementById('export-btn').addEventListener('click', openExportModal);
+        document.getElementById('ai-assistant-btn').addEventListener('click', openAIModal);
+        dots.forEach(dot => dot.addEventListener('click', () => showSlide(parseInt(dot.dataset.index))));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); if (!triggerNextBuild()) nextSlide(); }
+            else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+            else if (e.key.toLowerCase() === 'f') { e.preventDefault(); toggleFullScreen(); }
+            else if (e.key.toLowerCase() === 'p') { e.preventDefault(); openPresenterWindow(); }
+            else if (e.key === 'Escape') { const modal = document.querySelector('.modal-overlay:not(.hidden)'); if (modal) modal.classList.add('hidden'); }
+        });
+    }
+
+    function toggleFullScreen() {
+        if (document.fullscreenEnabled) {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`An error occurred while trying to enter full-screen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        } else {
+            console.warn("Fullscreen is not enabled in this context. If running in an iframe, the 'allow=\"fullscreen\"' attribute may be required.");
+        }
+    }
+
+    function showControls() {
+        document.body.classList.add('show-controls');
+        clearTimeout(controlsTimeout);
+        controlsTimeout = setTimeout(() => document.body.classList.remove('show-controls'), 3000);
+    }
+
+    function saveState() {
+        const editableContent = {};
+        document.querySelectorAll('[contenteditable="true"]').forEach((el, i) => { editableContent[`e-${i}`] = el.innerHTML; });
+        localStorage.setItem('presentationState', JSON.stringify({ currentSlide, editableContent }));
+    }
+
+    function loadState() {
+        const savedState = localStorage.getItem('presentationState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            if (state.editableContent) {
+                document.querySelectorAll('[contenteditable="true"]').forEach((el, i) => {
+                    if (state.editableContent[`e-${i}`]) el.innerHTML = state.editableContent[`e-${i}`];
+                });
+            }
+            showSlide(state.currentSlide || 0);
+        } else {
+            showSlide(0);
+        }
+    }
+
+    function setupInteractivity() {
+        document.body.addEventListener('input', (e) => { if (e.target.isContentEditable) saveState(); });
+        const roiCtx = document.getElementById('roiChart')?.getContext('2d');
+        if (roiCtx) {
+            new Chart(roiCtx, { type: 'bar',
+                data: { labels: ['Giảm chi phí tuyển dụng', 'Tăng năng suất LĐ', 'Giảm chi phí sai sót', 'Tăng doanh thu'],
+                    datasets: [{ label: 'Lợi ích Tài chính (Ước tính)', data: [15, 25, 10, 30],
+                        backgroundColor: ['rgba(0,150,136,0.6)','rgba(92,107,192,0.6)','rgba(255,152,0,0.6)','rgba(76,175,80,0.6)'],
+                        borderColor: ['#009688','#5C6BC0','#FF9800','#4CAF50'], borderWidth: 1 }] },
+                options: { scales: { y: { beginAtZero: true, ticks: {color:'#fff'}}, x: {ticks: {color:'#fff'}}},
+                    plugins: { legend: { labels: {color:'#fff'}}},
+                    responsive: true, maintainAspectRatio: false }
+            });
+        }
+    }
+    
+    const exportModal = document.getElementById('export-modal');
+    const slideSelectionList = document.getElementById('slide-selection-list');
+
+    function openExportModal() {
+        slideSelectionList.innerHTML = '';
+        slides.forEach((slide, index) => {
+            const title = slide.querySelector('h1,h2,h3,p')?.textContent.trim().substring(0,50) || `Slide ${index+1}`;
+            slideSelectionList.innerHTML += `<div class="flex items-center bg-gray-700 p-2 rounded"><input id="sc-${index}" type="checkbox" data-index="${index}" class="slide-checkbox w-5 h-5 text-blue-600" checked><label for="sc-${index}" class="ml-3 text-sm font-medium text-gray-300">${index+1}. ${title}...</label></div>`;
+        });
+        exportModal.classList.remove('hidden');
+    }
+    
+    document.getElementById('cancel-export').addEventListener('click', () => exportModal.classList.add('hidden'));
+    document.getElementById('select-all-slides').addEventListener('click', () => document.querySelectorAll('.slide-checkbox').forEach(cb => cb.checked = true));
+    document.getElementById('deselect-all-slides').addEventListener('click', () => document.querySelectorAll('.slide-checkbox').forEach(cb => cb.checked = false));
+
+    document.getElementById('export-as-html').addEventListener('click', () => {
+        const selected = Array.from(document.querySelectorAll('.slide-checkbox:checked')).map(cb => parseInt(cb.dataset.index));
+        if (selected.length === 0) {
+            // Using a custom modal or message box instead of alert()
+            console.log('Vui lòng chọn ít nhất một slide.');
+            return;
+        }
+        let html = `<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>VIMID Presentation</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&display=swap" rel="stylesheet"><style>body{font-family:'Oswald',sans-serif;background-color:#111827}.slide-export{width:1200px;height:675px;margin:2rem auto;overflow:hidden;position:relative;border:1px solid #333}</style></head><body>`;
+        selected.forEach(i => {
+            const clone = slides[i].cloneNode(true);
+            clone.classList.remove('active');
+            Object.assign(clone.style, {opacity:1,visibility:'visible',position:'relative',transform:'none'});
+            html += `<div class="slide-export">${clone.outerHTML}</div>`;
+        });
+        html += '</body></html>';
+        const blob = new Blob([html], {type:'text/html'});
+        const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'VIMID_Presentation.html'});
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('export-as-pdf').addEventListener('click', async () => {
+        const selected = Array.from(document.querySelectorAll('.slide-checkbox:checked')).map(cb => parseInt(cb.dataset.index));
+        if (selected.length === 0) {
+            // Using a custom modal or message box instead of alert()
+            console.log('Vui lòng chọn ít nhất một slide.');
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({orientation:'landscape', unit:'px', format:[1200,675]});
+        const tempContainer = document.createElement('div');
+        Object.assign(tempContainer.style, {position:'fixed',left:'-9999px',top:'-9999px'});
+        document.body.appendChild(tempContainer);
+        for (let i = 0; i < selected.length; i++) {
+            const slideToExport = slides[selected[i]].cloneNode(true);
+            slideToExport.classList.add('active');
+            Object.assign(slideToExport.style, {width:'1200px', height:'675px'});
+            tempContainer.innerHTML = '';
+            tempContainer.appendChild(slideToExport);
+            await new Promise(r => setTimeout(r, 100));
+            const canvas = await html2canvas(slideToExport, {scale:2, useCORS:true, backgroundColor:'#1F2937'});
+            if (i > 0) pdf.addPage([1200, 675], 'landscape');
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 1200, 675);
+        }
+        document.body.removeChild(tempContainer);
+        pdf.save('VIMID_Presentation.pdf');
+    });
+
+    const aiModal = document.getElementById('ai-modal');
+    const aiContent = document.getElementById('ai-content');
+    const aiSuggestions = {
+        'slide-8': "Thảo luận sâu hơn về rủi ro của từng lỗ hổng. Lỗ hổng nào có nguy cơ gây ảnh hưởng lớn nhất đến việc vận hành nhà máy mới trong 6 tháng đầu tiên?",
+        'slide-11': "Brainstorm về các thách thức trong việc phối hợp giữa khối Sản xuất và Kinh doanh. Cần có những quy trình liên chức năng cốt lõi nào để đảm bảo sự nhịp nhàng (ví dụ: quy trình S&OP - Sales and Operations Planning)?",
+        'slide-19': "Làm thế nào để đảm bảo các quản lý cấp trung thực sự công bằng khi đánh giá phần 'HOW' (hành vi)? Cần những chương trình đào tạo và công cụ gì để hỗ trợ họ?",
+        'default': "Hãy xem xét các kịch bản rủi ro tiềm ẩn trong quá trình thay đổi. Đâu là 3 rủi ro lớn nhất và chúng ta có kế hoạch giảm thiểu chúng như thế nào?"
+    };
+    function openAIModal() {
+        const id = slides[currentSlide].id;
+        aiContent.innerHTML = `<p class="text-lg text-gray-300">${aiSuggestions[id] || aiSuggestions['default']}</p>`;
+        aiModal.classList.remove('hidden');
+    }
+    document.getElementById('close-ai-modal').addEventListener('click', () => aiModal.classList.add('hidden'));
+
+    function init() {
+        setupControls();
+        document.body.addEventListener('mousemove', showControls);
+        controlsTimeout = setTimeout(() => document.body.classList.remove('show-controls'), 3000);
+        loadState();
+        setupInteractivity();
+    }
+    init();
+});
+</script>
+</body>
+</html>
+
